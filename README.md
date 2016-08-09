@@ -1,8 +1,9 @@
 ####Description
 
 ##CS224d
-[1. 深度学习与自然语言处理 主要概念一览](http://www.jianshu.com/p/6993edef96e4)
+[Day 1. 深度学习与自然语言处理 主要概念一览](http://www.jianshu.com/p/6993edef96e4)
 
+[Day 2. TensorFlow 入门](http://www.jianshu.com/p/6766fbcd43b9)
 
 ##算法
 [一个隐马尔科夫模型的应用实例：中文分词](http://www.jianshu.com/p/f140c3a44ab6)
