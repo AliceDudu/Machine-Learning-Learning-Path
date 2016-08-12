@@ -18,6 +18,8 @@
 
 [Machine Learning Notes-Decision Trees-Udacity](http://www.jianshu.com/p/c2916d616acc)
 
+##Python爬虫
+[Python爬虫学习路径](https://github.com/AliceDudu/Learning-Notes/tree/master/Crawler)
 
 ##环境
 [详解Mac配置虚拟环境Virtualenv，安装Python科学计算包](http://www.jianshu.com/p/51140800e8b4)
