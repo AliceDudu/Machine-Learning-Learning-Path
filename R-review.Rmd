@@ -1,0 +1,760 @@
+---
+title: "R-review"
+output: html_document
+---
+
+### 多行注释
+ctrl+shift+c
+
+### Help
+```{r}
+# help("decompose")
+# ?decompose
+example("decompose")
+```
+
+### workspace
+```{r}
+getwd()
+setwd("mydirectory")
+ls()
+```
+
+### package
+```{r}
+library()              #what packages you’ve saved
+installed.packages()   #lists the packages you have
+
+install.packages()     #install a pack- age
+library(gclus)         #load the package
+```
+
+### Batch processing
+```{r}
+# on Linux 
+# R CMD BATCH [options] my_script.R [outfile]
+```
+
+### Working with large datasets
+5-year-old Windows PC with 2 GB of RAM, I can easily han- dle datasets with 10 million elements (100 variables by 100,000 observations). On an iMac with 4 GB of RAM, I can usually handle 100 million elements without difficulty.
+
+### Data Structures
+
+1. Vectors
+```{r}
+a <- c(1,2,3,4,5,6)
+b <- c("one","two")
+c <- c(TRUE, FALSE)
+
+a[1:3]
+```
+
+2. Matrix
+```{r}
+a <- matrix(1:6, nrow=2)
+a[1,2]
+```
+
+3. Array
+```{r}
+z <- array(1:24, c(2,3,4))
+z[1,1,2]
+```
+
+4. Data Frame
+```{r}
+patientID <- c(1,2,3)
+age <- c(24,35,45)
+status <- c("poor", "improved", "excellent")
+patientdata <- data.frame(patientID, age, status, row.names = patientID)
+```
+
+Select data
+```{r}
+patientdata$age
+patientdata[c("age", "status")]
+patientdata[ , c(1:2)]
+
+myvars <- names(leadership) %in% c("q3", "q4")
+leadership[!myvars]
+
+leadership[1:3, ]
+leadership[which(leadership$gender=="M" & leadership$age>30), ]
+
+subset(leadership, age>=35 | age<24, select = c(q1,q2))
+```
+
+
+```{r}
+attach(patientdata)
+summary(patientID)
+plot(age)
+detach(patientdata)
+```
+
+5. List
+gather a variety of (possibly unrelated) objects under one name
+```{r}
+g <- "My First List"
+h <- c(25,26,14,23)
+j <- matrix(1:10, nrow = 5)
+k <- c("one", "two", "three")
+mylist <- list(title=g, ages=h, j, k)
+
+mylist
+mylist[2]
+mylist[[2]]
+```
+
+
+### Input data
+```{r}
+grads <- read.table("studentgrades.csv", header=TRUE, sep=",")
+```
+
+### work with data
+```{r}
+length(patientdata)
+dim(patientdata)
+str(patientdata)           #Structure of an object
+class(patientdata)
+mode(patientdata)          #How an object is stored
+names(patientdata)
+head(patientdata, 2)
+tail(patientdata, 2)
+```
+
+```{r}
+a <- c(1:5)
+b <- c(3:7)
+cbind(a, b)                 #Combines objects as columns
+rbind(a, b)                 #Combines objects as rows
+```
+
+### Graphical
+```{r}
+dose  <- c(20, 30, 40, 45, 60)
+drugA <- c(16, 20, 27, 40, 60)
+drugB <- c(15, 18, 25, 31, 40)
+```
+
+R color chart:
+http://research.stowers-institute.org/efg/R/Color/Chart/
+
+1. plot，lines，abline，legend
+```{r}
+plot(dose, drugA, type="b", lty=3, lwd=3, pch=20, cex=2, col=117, main="Drug A", sub="This is hypothetical data", xlab = "Dosage", ylab = "Drug Response", xlim = c(0, 60), ylim = c(0, 70))
+
+lines(dose, drugB, type="b", pch=23, lty=6, col="blue", bg="green")
+
+abline(h=20, v=40)       #Reference lines
+
+legend("topleft", title="Drug Type", c("A","B"), lty=c(3, 6), pch=c(20, 23), col=c(117, "blue"))
+```
+
+plot text
+```{r}
+opar <- par(no.readonly=TRUE)
+par(cex=1.5)
+plot(1:7,1:7,type="n")
+text(3,3,"Example of default text")
+text(4,4,family="mono","Example of mono-spaced text")
+text(5,5,family="serif","Example of serif text")
+par(opar)
+```
+
+2. 画多个图
+```{r}
+attach(mtcars)
+opar <- par(no.readonly=TRUE)
+par(mfrow=c(2,2))
+
+plot(wt, mpg, main="scatterplot of wt vs mpg")
+plot(wt, disp, main="scatterplot of wt vs disp")
+hist(wt, main="histogram of wt")
+boxplot(wt, main="boxplot of wt")
+
+par(opar)
+detach(mtcars)
+```
+
+hist
+```{r}
+attach(mtcars)
+layout(matrix(c(1, 1, 1, 2, 2, 3), 2, 3, byrow = TRUE),
+       widths=c(4, 1), heights=c(1, 2))
+#matrix的c向量里面数字代表图的序号
+#widths就是右和左比例，heights就是上和下的比例
+hist(wt)
+hist(mpg)
+hist(disp)
+detach(mtcars)
+```
+
+bar
+```{r}
+opar <- par(no.readonly=TRUE)
+par(mfrow=c(1,2))
+barplot(mtcars$cyl)
+barplot(mtcars$cyl, horiz = TRUE)
+par(opar)
+```
+
+pie
+```{r}
+slices <- c(22,14,35,43)
+lbls <- c("a", "b", "c", "d")
+pct <- round(slices/sum(slices)*100)
+lbls2 <- paste(lbls, " ", pct, "%", sep="")
+pie(slices, labels=lbls2, col=rainbow(length(lbls2)))
+```
+
+density
+```{r}
+d <- density(mtcars$mpg)
+plot(d)
+polygon(d, col = "red", border="blue")
+rug(mtcars$mpg, col="brown")
+```
+
+boxplot
+```{r}
+boxplot(mpg~cyl, data=mtcars, xlab="Number of Cylinders", ylab="Miles Per Gallon", col=c("gold","darkgreen"), notch=TRUE, varwidth=TRUE)
+```
+
+dot plots
+```{r}
+dotchart(mtcars$mpg, labels=row.names(mtcars), xlab="Miles Per Gallon", main="Gas Mileage for Car Models")
+```
+
+```{r}
+x <- mtcars[order(mtcars$mpg), ]
+x$cyl <- factor(x$cyl)
+x$color[x$cyl==4] <- "red"
+x$color[x$cyl==6] <- "blue"
+x$color[x$cyl==8] <- "darkgreen"
+
+dotchart(x$mpg, 
+         labels = row.names(x),
+         groups =x $cyl,
+         color = x$color,
+         main = "Gas Mileage for Car Models\n grouped by cylinder",
+         xlab = "Miles Per Gallon"
+         )
+```
+
+scatter plot
+```{r}
+library(car)
+scatterplot(weight ~ height, data=women, xlab = "height", ylab = "weight")
+```
+
+
+
+---
+## 2. 数据操作
+---
+
+```{r}
+manager <- c(1, 2, 3, 4, 5)
+        date <- c("10/24/08", "10/28/08", "10/1/08", "10/12/08", "5/1/09")
+        country <- c("US", "US", "UK", "UK", "UK")
+        gender <- c("M", "F", "F", "M", "F")
+        age <- c(32, 45, 25, 39, 99)
+        q1 <- c(5, 3, 3, 3, 2)
+        q2 <- c(4, 5, 5, 3, 2)
+        q3 <- c(5, 2, 5, 4, 1)
+        q4 <- c(5, 5, 5, NA, 2)
+        q5 <- c(5, 5, 2, NA, 1)
+```
+
+
+```{r}
+leadership <- data.frame(manager, date, country, gender, age, 
+                    q1, q2, q3, q4, q5, stringsAsFactors = FALSE)
+```
+
+1. Creating new variables
+```{r}
+attach(leadership)
+leadership$qmean <- (q1+ q2+ q3+ q4+ q5)/5
+detach(leadership)
+```
+
+2. Missing value
+```{r}
+is.na(leadership)
+```
+
+3. Time
+```{r}
+startdate <- as.Date("2004-02-13")
+enddate   <- as.Date("2011-01-22")
+
+days      <- enddate - startdate
+```
+
+4. Sort
+```{r}
+attach(leadership)
+leadership[order(gender, age), ]
+detach(leadership)
+```
+
+
+### Mathematical functions
+```{r}
+abs(-3)
+sqrt(4)
+
+ceiling(3.475)
+floor(3.475)
+
+round(3.475, digits = 2)
+signif(3.475, digits = 2)
+
+cos(1)
+acos(0)
+
+log(8, base = 2)
+log10(10)
+
+exp(2)
+```
+
+
+### Statistical functions
+```{r}
+x <- c(1,2,3,4)
+
+mean(x)
+median(x)
+sd(x)
+var(x)
+quantile(x, c(0.3, 0.84))
+
+range(x)
+sum(x)
+diff(x)
+
+min(x)
+max(x)
+```
+
+2. standardizes 
+```{r}
+scale(x)      #to a mean of 0 and a standard deviation of 1
+newdata <- scale(mydata)*SD + M     #to an arbitrary mean and standard deviation
+```
+
+
+a different seed, and therefore dif- ferent results, are produced. To make your results reproducible, you can specify the seed explicitly
+
+3. Random generation
+```{r}
+set.seed(2345)   #specify the seed explicitly
+runif(5)      #generate pseudo-random numbers from a uni- form distribution on the interval 0 to 1
+rnorm(500)
+```
+
+multiple normal distribution data
+```{r}
+library(MASS)
+example(mvrnorm)
+```
+
+
+### Control flow
+1. for
+```{r}
+for (i in 1:10){
+  print (i)
+}
+```
+
+2. while
+```{r}
+i <- 1
+while (i>0 & i<10){
+  print (i)
+  i = i+1
+}
+```
+
+3. switch
+```{r}
+feelings <- c("sad", "angry")
+for (i in feelings){
+  print(
+    switch (i,
+      happy = "I am glad you are happy",
+      sad = "cheer up",
+      angry = "calm down"
+    )
+  )
+}
+```
+
+4. if
+```{r}
+i <- 4
+if (i<3){
+  print ("low")
+}else if(i<8){
+  print ("middle")
+}else{
+  print ("high")
+}
+```
+
+5. User-written functions
+```{r}
+level <- function(i){
+  if (i<3){
+    print ("low")
+  }else if(i<8){
+    print ("middle")
+  }else{
+    print ("high")
+  }
+}
+level(4)
+```
+
+### Reshape
+1. Transpose
+```{r}
+cars <- mtcars[1:5, 1:4]
+t(cars)
+```
+
+2. Aggregate, sapply
+```{r}
+options(digits = 3)
+attach(mtcars)
+aggregate(mtcars, by=list(cyl, gear), FUN=mean, na.rm=TRUE)
+# group1 2 分别代表cyl和gear的值
+```
+
+```{r}
+sapply(mtcars[vars], FUN, options)
+```
+
+
+3. melt, cast
+```{r}
+md <- melt(mydata, id=c("id", "time"))
+cast(md, id~variable+time)
+```
+
+
+### Descriptive statistics
+1. summary
+```{r}
+vars <- c("mpg", "hp", "wt")
+summary(mtcars[vars])
+```
+
+```{r}
+library(reshape)
+
+dstats <- function(x){
+  c(n=length(x), 
+    mean=mean(x),
+    sd=sd(x))
+}
+
+dfm <- melt(mtcars, measure.vars = c("mpg", "hp", "wt"), id.vars = c("am", "cyl"))
+#measure.vars 这几个被放在变量那列variable，value那列是相应的值
+#id.vars 这几个被选为基准列
+
+result <- cast(dfm, am+cyl+variable~., dstats)
+#am+cyl+variable作为基准列key，执行dstats函数，得到n，mean，sd
+```
+
+2. 频数
+```{r}
+table(mtcars$mpg)
+```
+
+### Regression
+simple linear 
+polynomial
+multiple linear
+multivariate
+logistic
+poisson
+time series
+nonlinear
+robust
+
+### ordinary least squares
+
+car package:
+provides a number of functions that significantly enhance your ability to fit and evaluate regression models
+
+```{r}
+fit <- lm(weight ~ height, data=women)
+summary(fit)
+# ***: significantly different from zero
+# Multiple R-squared: the model accounts for 99.1 percent of the variance in weights
+# the correlation between the actual and predicted value
+# Residual standard error: average error predicting weight from height using this model
+# F-statistic: whether the pre- dictor variables taken together, predict the response variable above chance levels
+```
+
+### Polynomial regression
+```{r}
+fit2 <- lm(weight ~ height + I(height^2), data=women)
+# I function treats the contents within the paren- theses as an R regular expression
+```
+
+
+Multiple linear regression
+```{r}
+states <- as.data.frame(state.x77[ , c("Murder", "Population", "Illiteracy", "Income", "Frost")])
+
+cor(states)
+
+#library(car)
+scatterplotMatrix(states, spread=FALSE, lty.smooth=2)
+```
+
+```{r}
+fit <- lm(Murder ~ Population + Illiteracy + Income + Frost, data = states)
+summary(fit)
+
+# Coefficients:
+# indicate the increase in the dependent variable for a unit change in a predictor variable, hold- ing all other predictor variables constant.
+
+# The coefficient is significantly different from zero at the p < .0001 level
+
+# for Frost: 
+# isn’t significantly different from zero (p = 0.954) suggesting that Frost and Murder aren’t linearly related when controlling for the other predictor variables. 
+
+confint(fit)
+# The results suggest that you can be 95 percent confident that the interval [2.38, 5.90] contains the true change in murder rate for a 1 percent change in illiteracy rate
+```
+
+```{r}
+opar <- par(no.readonly = TRUE)
+par(mfrow=c(2,2))
+plot(fit)
+par(opar)
+
+# Normal Q-Q plot (upper right): ---Normality
+#If you’ve met the normality assumption, the points on this graph should fall on the straight 45-degree line
+
+# Residuals versus Fitted graph (upper left), --Linearity 
+# you see clear evidence of a curved relationship, which suggests that you may want to add a quadratic term to the regression
+
+# Scale-Location graph (bottom left) 
+# if meet constant variance assumption, should be a random band around a hori- zontal line.
+
+# Residual versus Leverage graph (bottom right)---outlier 
+# deleting it has an impact on the parameter estimates
+# Homoscedasticity, using a statistic called Cook’s distance
+# graph identifies outliers, high-leverage points, and influential observations.
+
+# outlier:
+# has a large positive or negative residual
+
+# with a high leverage value
+# it’s an outlier in the predictor space
+
+# dropping both observation 13 and 15 produces a better
+```
+
+
+```{r}
+durbinWatsonTest(fit)
+
+# INDEPENDENCE OF ERRORS
+# the Durbin–Watson test to detect such serially correlated errors
+# p-value (p=0.282) suggests a lack of autocorrelation, and conversely an independence of errors
+```
+
+```{r}
+crPlots(fit)
+
+# to test LINEARITY
+# partial residual plots
+# if not meet linearity, If so, you may need to add curvilinear components such as polyno- mial terms, transform one or more variables (for example, use log(X) instead of X)
+```
+
+
+### identify outliers
+1. Q-Q plot
+2. Bonferroni adjusted p-value
+```{r}
+outlierTest(fit)
+# Nevada is identified as an outlier (p = 0.048)
+# if it isn’t significant, there are no outliers in the dataset. If it is significant, you must delete it and rerun the test to see if others are present
+```
+
+3. hat statistic
+
+For a given dataset, the average hat value is p/n, where p is the number of parameters estimated in the model (including the intercept) and n is the sample size
+```{r}
+# Observations that have high leverage are outliers
+# an observation with a hat value greater than 2 or 3 times the average hat value should be examined.
+
+# Clicking on points of interest labels them
+hat.plot <- function(fit){
+  p <- length(coefficients(fit))
+  n <- length(fitted(fit))
+  plot(hatvalues(fit), main="Index plot of Hat values")
+  abline(h=c(2,3)*p/n, col="red", lty=2)
+  identify(1:n, hatvalues(fit), names(hatvalues(fit)))
+}
+hat.plot(fit)
+```
+
+
+### Influential observations
+
+your model changes dramatical- ly with the removal of a single observation
+
+1. Cook’s distance, or D statistic
+
+Cook’s D values greater than 4/(n-k-1), where n is the sample size and k is the number of predictor variables, indicate influential observations
+
+```{r}
+cutoff <- 4/(nrow(states)-length(fit$coefficients)-2)
+plot(fit, which = 4, cook.levels = cutoff)
+abline(h=cutoff, lty=2, col="red")
+
+# Alaska, Hawaii, and Nevada as influential observations. Deleting these states will have a notable impact on the values of the intercept and slopes
+```
+
+
+2. added variable plots
+on how these observations affect the model
+
+```{r}
+avPlots(fit, ask=FALSE, onepage=TRUE, id.method="identify")
+
+# The straight line in each plot is the actual regression coefficient for that predictor variable
+
+# imagining how the line would change if the point representing that observation was deleted
+
+#  lower-left corner. You can see that eliminating the point labeled Alaska would move the line in a negative direction
+```
+
+
+combine the information from outlier, leverage, and influence plots
+```{r}
+influencePlot(fit, id.method = "identify", main="influence plot")
+
+# nfluence plot. States above +2 or below –2 on the vertical axis are considered outliers. States above 0.2 or 0.3 on the horizontal axis have high leverage (unusual combinations of predictor values). Circle size is proportional to influence. Observations depicted by large circles may have disproportionate influence on the parameters estimates of the model.
+```
+
+“What do you do if you identify problems?”
+■ Deleting observations
+■ Transforming variables
+■ Adding or deleting variables
+■ Using another regression approach
+
+When models don’t meet the normality, linearity, or homoscedasticity assumptions, transforming one or more variables
+
+```{r}
+summary(powerTransform(states$Murder))
+
+# Murder by replacing it with Murder0.6
+# hypothesis that λ=1 can’t be rejected (p = 0.145), so there’s no strong evidence that a transformation is actually needed in this case
+```
+
+
+1. violated the normality assumption, you can fit a nonparametric regression model
+2. there’s significant nonlinearity, you can try a nonlinear regression model
+3. violated the assumptions of independence of errors, you can fit a model that specifically takes the error structure into account, such as time-series models or multi- level regression models
+
+
+### Comparing models
+whether a model without these two variables predicts as well as one that includes them 
+
+1. ANOVA
+```{r}
+fit1 <- lm(Murder ~ Population + Illiteracy + Income + Frost, data=states)
+fit2 <- lm(Murder ~ Population + Illiteracy, data = states)
+anova(fit2, fit1)
+
+# test that Income and Frost add to linear prediction above
+# the test is nonsignificant (p = .994)
+# conclude that they don’t add to the linear prediction and we’re justified in dropping them from our model
+```
+
+2. AIC
+Models with smaller AIC values—indicating adequate fit with fewer parameters—are preferred.
+```{r}
+AIC(fit1, fit2)
+
+# suggest that the model without Income and Frost is the better model
+```
+
+### Variable selection
+1. STEPWISE REGRESSION
+stepwise selection, variables are added to or deleted from a model one at a time, until some stopping criterion is reached
+
+```{r}
+library(MASS)
+```
+
+```{r}
+fit1 <- lm(Murder ~ Population + Illiteracy + Income + Frost, data=states)
+stepAIC(fit1, direction = "backward")
+
+# In the first step, Frost is removed, decreasing the AIC from 97.75 to 95.75. In the second step, Income is re- moved, decreasing the AIC to 93.76. Deleting any more variables would increase the AIC, so the process stops.
+```
+
+2. all-subsets regression
+
+### Cross-validation
+“How well will this equation perform in the real world?”
+
+Cross-validation is a useful method for evaluating the generalizability of a regression equation
+
+In cross-validation, a portion of the data is selected as the training sample and a portion is selected as the hold-out sample. A regression equation is developed on the training sample, and then applied to the hold-out sample. 
+
+In k-fold cross-validation, the sample is divided into k subsamples. Each of the k subsamples serves as a hold-out group and the combined observations from the remaining k-1 subsamples serves as the training group.
+
+```{r}
+install.packages("bootstrap")
+```
+
+
+```{r}
+shrinkage <- function(fit, k=10){
+  require(bootstrap)
+  
+  theta.fit <- function(x, y){lsfit(x, y)}
+  theta.predict <- function(fit, x){cbind(1, x)%*%fit$coef}
+  
+  x <- fit$model[ , 2:ncol(fit$model)]
+  y <- fit$model[ , 1]
+  
+  results <- crossval(x, y, theta.fit, theta.predict, ngroup=k)
+  # cross-validation
+  
+  r2 <- cor(y, fit$fitted.values)^2
+  r2cv <- cor(y, results$cv.fit)^2
+  cat("original r-square =", r2, "\n")
+  cat(k, "fold cross-validated r-square =", r2cv, "\n")
+  cat("change =", r2-r2cv, "\n")
+}
+
+shrinkage(fit)
+shrinkage(fit2)
+
+# sample (0.567) is overly optimistic
+# two-predictor model a more attractive alternative
+```
+
+
+```{r}
+
+```
+
+
+
+
