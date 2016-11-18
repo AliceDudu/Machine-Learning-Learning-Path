@@ -1,0 +1,172 @@
+---
+title: "ARIMA"
+output: pdf_document
+---
+
+### 1、加载数据
+```{r}
+skirts <- scan("http://robjhyndman.com/tsdldata/roberts/skirts.dat", skip=5)
+```
+
+```{r}
+str(skirts)
+head(skirts)
+boxplot(skirts)
+length(skirts)
+```
+
+### 2、把数据转化为是时间序列
+```{r}
+skirts_ts <- ts(skirts, start=c(1886), frequency=1)
+```
+
+**1)查看时间序列对应的时间**
+```{r}
+skirts_ts 
+```
+
+**2)画出时间序列图**
+```{r}
+plot.ts(skirts_ts)
+```
+
+*从上图可知：女人裙子边缘的直径做成的时间序列数据，从 1866 年到 1911 年在平均值上是不平稳的*
+
+### 3、做差分得到平稳序列
+
+**1)做时间序列的一阶差分**
+```{r}
+skirts_diff <- diff(skirts_ts, differences = 1)
+plot.ts(skirts_diff)
+```
+
+*从一阶差分的图中可以看出，数据仍是不平稳的，继续差分*
+
+**2)做时间序列的二阶差分**
+
+```{r}
+skirts_diff2 <- diff(skirts_ts, differences = 2)
+plot.ts(skirts_diff2)
+```
+
+*二次差分后的时间序列在均值和方差上看起来是平稳了*
+
+
+### 4、找到合适的ARIMA模型
+
+*寻找 ARIMA(p,d,q)中合适的 p 值和 q* 
+
+**1)自相关图ACF**
+
+```{r}
+acf(skirts_diff2, lag.max = 20)
+```
+
+```{r}
+acf(skirts_diff2, lag.max = 20, plot = F)
+```
+
+*自相关图显示滞后1阶自相关值基本没有超过边界值，虽然5阶自相关值超出边界，那么很可能属于偶然出现的，而自相关值在其他上都没有超出显著边界， 而且我们可以期望 1 到 20 之间的会偶尔超出 95%的置信边界。 自相关图5阶后结尾*
+
+**2)偏相关图PACF**
+
+```{r}
+pacf(skirts_diff2, lag.max = 20)
+```
+
+```{r}
+pacf(skirts_diff2, lag.max = 20, plot = F)
+```
+
+*偏自相关值选1阶后结尾*
+*故我们的ARMIA模型为armia（1,2,5*
+
+**3)使用auto.arima()函数，自动获取最佳的ARIMA模型**
+```{r}
+library(forecast)
+```
+
+```{r}
+auto.arima(skirts_ts, ic=c("aicc", "aic", "bic"), trace = T)
+```
+
+*Best model: ARIMA(1,2,0)*
+
+### 5、建立ARIMA模型：并对比arima(1, 2, 0)与arima(1, 2, 5)模型
+
+**1）arima(1, 2, 0)模型**
+```{r}
+(skirts_arima <- arima(skirts_ts, order = c(1, 2, 0)))
+```
+*aic = 391.33*
+
+**2）arima(1, 2, 5)模型**
+```{r}
+(skirts_arima <- arima(skirts_ts, order = c(1, 2, 5)))
+```
+*aic = 381.6*
+
+*AIC是赤池消息准则SC是施瓦茨准则，当两个数值最小时，则是最优滞后分布的长度。我们进行模型选择时，AIC值越小越好。所以arima(1, 2, 5)模型较好*
+
+### 6、预测：预测5年后裙子的边缘直径
+```{r}
+(skirts_forecast <- forecast.Arima(skirts_arima, h=5, level = c(99.5)))
+```
+
+```{r}
+plot.forecast(skirts_forecast)
+```
+
+### 7、检验
+
+*观察 ARIMA 模型的预测误差是否是平均值为 0 且方差为常数的正态分布，同时也要观察连续预测误差是否自相关*
+
+**1）检验预测误差的自相关性**
+```{r}
+tsdiag(skirts_arima)
+```
+
+第一个图表代表估计模型误差的绘图。英文叫做Standardized Residuals, 上面有很多竖线在横向坐标的上下分布。如果这个估计的模型比较可信，竖线的长度是比较相似的。如果竖线的长度互相有很大出入或者根本就不同，估计模型的可信度就非常差。下面误差绘图中竖线的长度比较相似，都处在稳定范围之内，即估计的模型没产生不符合要求的误差分布。
+
+再介绍输出的第二张绘图，标题是ACF of Residuals。ACF指数据点相互之间的关系，当然在生成这个数据时，数据点之间互相独立，并不存在任何关系。所以在这张图上，只有位于0刻度上的竖线最高，其ACF值为1。 这个0代表数据点与自己相比较， 即数据点永远和它自己有关系，这种关系数值为1。其他横向数轴上的刻度代表一个数据点于其他数据点之间的关系，这些刻度上竖线的长度几乎等于0，即这个数据点与其他数据点没明显关系。这张ACF图代表估计的模型没造成误差之间的任何关系。这是符合数据生成时每个数据都是独立的这个前提的。由此可见，这ACF图符合检测要求。
+
+下面来介绍第三张图，也就是Ljung-Box 指标。这个指标可对每一个时间序列的延迟进行显著性的评估。这张图的横坐标代表时间序列的延迟，纵坐标代表P-value，即显著性。如果P-value十分小，就说明在其相对应的延迟点上是显著的。我们就需要抛弃所假设的模型，并且结论在所假设的模型不可信。需要注意的是，他们使用假设的模型对一个时间序列进行估计，如果P-value是显著的话，我们使用的模型就不可信，需要尝试其他新模型。具体判定技巧是，P-value点的高度越高，我们的模型越可信。
+
+```{r}
+acf(skirts_forecast$residuals, lag.max = 20)
+```
+
+```{r}
+Box.test(skirts_forecast$residuals, lag=20, type = "Ljung-Box")
+```
+p-value = 0.9871
+相关图显示出在滞后1-20阶中样本自相关值都没有超出显著置信边界，而且Ljung-Box检验的p值为0.99，所以我们推断在滞后1-20阶（lags1-20）中没明显证据说明预测误差是非零自相关的。
+
+*Acf检验说明：残差没有明显的自相关性，Ljung-Box测试显示：所有的P-value>0.05，说明残差为白噪声。*
+
+**2）判断预测误差是否是平均值为零且方差为常数的正态分布**
+做预测误差的时间曲线图和直方图（具有正态分布曲线）
+
+**预测误差的均值是否为0**
+```{r}
+plot.ts(skirts_forecast$residuals)
+```
+
+**自定义判断预测误差的方差是正态分布的函数**
+
+```{r}
+plotForecastErrors <- function(forecasterrors){
+  #画预测误差的直方图
+  hist(forecasterrors, col="red", freq = F)
+  #画方差是预测误差数据的方差，平均值是0的正态分布数据的线
+  mysd <- sd(forecasterrors)
+  mynorm <- rnorm(10000, mean = 0, sd = mysd)
+  myhist <- hist(mynorm, plot = F)
+  points(myhist$mids, myhist$density, type="l", col="blue", lwd=2)
+}
+plotForecastErrors(skirts_forecast$residuals)
+```
+
+上图显示出随着时间增加，方差大致为常数（大致不变）（尽管上半部分的时间序列方差看起来稍微高一些）。时间序列的直方图显示预测误大致是正态分布的且平均值接近于0。因此，把预测误差看作平均值为0方差为服从零均值、方差不变的正态分布是合理的。
+
+*既然依次连续的预测误差看起来不是相关，而且服从零均值、方差不变的正态分布，那么对于裙子直径的数据，ARIMA(1,2,5)看起来是可以提供非常合适预测的模型。*
