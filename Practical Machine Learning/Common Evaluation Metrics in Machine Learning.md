@@ -8,9 +8,9 @@
 
 ---
 
-###回归：
+### 回归：
 
-#####均方误差：
+##### 均方误差：
 
 ![](http://upload-images.jianshu.io/upload_images/1667471-e3ba89798e351f3e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -29,9 +29,9 @@ mean_squared_error(y_true, y_pred)
 
 ---
 
-###分类：
+### 分类：
 
-#####二分类 and 多分类：
+##### 二分类 and 多分类：
 
 **错误率**
 ![](http://upload-images.jianshu.io/upload_images/1667471-6b5029c96df86527.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -41,9 +41,9 @@ mean_squared_error(y_true, y_pred)
 
 ---
 
-#####二分类
+##### 二分类
 
-#####混淆矩阵：
+##### 混淆矩阵：
 
 ![](http://upload-images.jianshu.io/upload_images/1667471-50d642acd5cd778a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -110,7 +110,7 @@ F1: 0.964
 
 ---
 
-#####One vs. All (OvA) 分类问题
+##### One vs. All (OvA) 分类问题
 这时会在 n 个二分类问题上综合考虑查准率，查全率。
 
 **宏～ ：先在每个混淆矩阵上计算率，再求平均**
@@ -170,7 +170,7 @@ roc_auc_score(y_true, y_scores)
 
 ---
 
-#####代价敏感
+##### 代价敏感
 现实任务中，当不同类型的错误具有不同的影响后果时，它们的代价也是不一样的。
 
 此时，可以设定 
